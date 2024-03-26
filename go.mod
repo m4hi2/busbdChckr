@@ -1,3 +1,3 @@
-module github.com/m4hi2/busbdChckr
+module github.com/fahimimam/busbdChckr
 
 go 1.21.6
