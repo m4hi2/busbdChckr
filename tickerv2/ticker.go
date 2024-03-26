@@ -2,8 +2,9 @@ package tickerv2
 
 import (
 	"fmt"
-	"github.com/m4hi2/busbdChckr/businfo"
-	"github.com/m4hi2/busbdChckr/businfo/models"
+	"github.com/fahimimam/busbdChckr/businfo"
+	avbusinfo "github.com/fahimimam/busbdChckr/businfo/availableBusInformation"
+	"github.com/fahimimam/busbdChckr/businfo/models"
 	"log"
 	"strings"
 	"time"
@@ -16,7 +17,7 @@ func RunTickerV2() {
 	source = strings.ToLower(source)
 	destination := "khulna"
 	destination = strings.ToLower(destination)
-	data := businfo.RequestPld{
+	data := avbusinfo.RequestPld{
 		Date:          "2024-04-04",
 		Identifier:    fmt.Sprintf("%s-to-%s", source, destination),
 		StructureType: StructureTypeBus,
@@ -26,11 +27,11 @@ func RunTickerV2() {
 	if err != nil {
 		log.Println("Error fetching initial data:", err)
 	}
-
+	log.Println("Fetched Data from server...")
 	// Start a goroutine to periodically check for updates
 	ticker := time.NewTicker(1 * time.Hour) // Adjust interval as needed
 	defer ticker.Stop()
-
+	log.Println("Ticker Running...")
 	for {
 		select {
 		case <-ticker.C:
@@ -52,7 +53,7 @@ func RunTickerV2() {
 }
 
 // Function to fetch bus information
-func fetchBusInfo(data businfo.RequestPld) ([]*models.NotificationPld, error) {
+func fetchBusInfo(data avbusinfo.RequestPld) ([]*models.NotificationPld, error) {
 	return businfo.GetBusInfoV2(data)
 }
 

@@ -2,13 +2,18 @@ package availableBusInformation
 
 import (
 	"encoding/json"
-	"github.com/fahimimam/busbdChckr/businfo"
 	"github.com/fahimimam/busbdChckr/businfo/client"
 	"github.com/fahimimam/busbdChckr/businfo/models"
 	"net/http"
 )
 
-func GetAvailableBusInformation(data businfo.RequestPld) (*models.BusInfo, error) {
+type RequestPld struct {
+	Date          string `json:"date"`
+	Identifier    string `json:"identifier"`
+	StructureType string `json:"structureType"`
+}
+
+func GetAvailableBusInformation(data RequestPld) (*models.BusInfo, error) {
 	buf, err := BodyBuffer(data)
 	if err != nil {
 		return nil, err

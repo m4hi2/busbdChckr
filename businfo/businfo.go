@@ -1,18 +1,12 @@
 package businfo
 
 import (
-	"github.com/m4hi2/busbdChckr/businfo/availableBusInformation"
-	"github.com/m4hi2/busbdChckr/businfo/models"
+	businfo "github.com/fahimimam/busbdChckr/businfo/availableBusInformation"
+	"github.com/fahimimam/busbdChckr/businfo/models"
 )
 
-type RequestPld struct {
-	Date          string `json:"date"`
-	Identifier    string `json:"identifier"`
-	StructureType string `json:"structureType"`
-}
-
-func GetBusInfoV2(data RequestPld) ([]*models.NotificationPld, error) {
-	bInfo, err := availableBusInformation.GetAvailableBusInformation(data)
+func GetBusInfoV2(data businfo.RequestPld) ([]*models.NotificationPld, error) {
+	bInfo, err := businfo.GetAvailableBusInformation(data)
 	if err != nil {
 		return nil, err
 	}
