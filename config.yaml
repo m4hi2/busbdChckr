@@ -1,0 +1,5 @@
+telegram:
+  token: hh
+
+ticker:
+  duration: 1h
