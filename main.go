@@ -5,10 +5,6 @@ import (
 	"github.com/fahimimam/busbdChckr/ticker"
 )
 
-const (
-	runner = "v2"
-)
-
 func init() {
 	stations.ProcessStationMap()
 }
