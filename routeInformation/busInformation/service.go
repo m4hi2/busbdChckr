@@ -1,4 +1,21 @@
-package models
+package busInformation
+
+import (
+	"encoding/json"
+	"github.com/fahimimam/busbdChckr/routeInformation"
+	"github.com/fahimimam/busbdChckr/routeInformation/client"
+	"net/http"
+)
+
+const (
+	Path = "/v1/coaches/search"
+)
+
+type RequestPld struct {
+	FromStationId string `json:"fromStationId"`
+	ToStationId   string `json:"toStationId"`
+	Date          string `json:"date"`
+}
 
 type BusInfo struct {
 	Message interface{} `json:"message"`
@@ -33,14 +50,31 @@ type BusInfo struct {
 	} `json:"data"`
 }
 
-type NotificationPld struct {
-	RouteId        string  `json:"routeId"`
-	CoachNo        string  `json:"coachNo"`
-	RouteName      string  `json:"routeName"`
-	AvailableSeats int     `json:"availableSeats"`
-	StartCounter   string  `json:"startCounter"`
-	ArrivaleTime   *string `json:"arrivaleTime"`
-	DepartureTime  string  `json:"departureTime"`
-	CompanyName    string  `json:"companyName"`
-	Fare           string  `json:"fare"`
+func GetAvailableBusInformation(data RequestPld) (*BusInfo, error) {
+	buf, err := BodyBuffer(data)
+	if err != nil {
+		return nil, err
+	}
+	url := routeInformation.BuildUrl(Path)
+	req, err := http.NewRequest(http.MethodPost, url, buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("content-type", "application/json")
+
+	resp, err := client.GetClient().Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	busInfo := &BusInfo{}
+	err = json.NewDecoder(resp.Body).Decode(busInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	return busInfo, nil
 }

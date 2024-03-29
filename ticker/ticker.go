@@ -1,10 +1,11 @@
-package tickerv2
+package ticker
 
 import (
-	"fmt"
-	"github.com/fahimimam/busbdChckr/businfo"
-	avbusinfo "github.com/fahimimam/busbdChckr/businfo/availableBusInformation"
-	"github.com/fahimimam/busbdChckr/businfo/models"
+	"errors"
+	"github.com/fahimimam/busbdChckr/routeInformation"
+	avbusinfo "github.com/fahimimam/busbdChckr/routeInformation/busInformation"
+	"github.com/fahimimam/busbdChckr/routeInformation/models"
+	"github.com/fahimimam/busbdChckr/stations"
 	"log"
 	"strings"
 	"time"
@@ -12,18 +13,17 @@ import (
 
 const StructureTypeBus = "BUS"
 
-func RunTickerV2() {
-	source := "Dhaka"
-	source = strings.ToLower(source)
-	destination := "khulna"
-	destination = strings.ToLower(destination)
+func RetrieveInformation(source, destination, date string) {
+	sourceID := stations.StationCodeToStationID[strings.ToLower(source)]
+	destID := stations.StationCodeToStationID[strings.ToLower(destination)]
+	// How am I getting data
 	data := avbusinfo.RequestPld{
-		Date:          "2024-04-04",
-		Identifier:    fmt.Sprintf("%s-to-%s", source, destination),
-		StructureType: StructureTypeBus,
+		Date:          date,
+		FromStationId: sourceID,
+		ToStationId:   destID,
 	}
 	// Initial fetch
-	prevData, err := fetchBusInfo(data)
+	prevData, err := fetchBusInfo(data, StructureTypeBus)
 	if err != nil {
 		log.Println("Error fetching initial data:", err)
 	}
@@ -35,7 +35,7 @@ func RunTickerV2() {
 	for {
 		select {
 		case <-ticker.C:
-			updatedData, err := fetchBusInfo(data)
+			updatedData, err := fetchBusInfo(data, StructureTypeBus)
 			if err != nil {
 				log.Println("Error fetching updated data:", err)
 				continue
@@ -53,8 +53,14 @@ func RunTickerV2() {
 }
 
 // Function to fetch bus information
-func fetchBusInfo(data avbusinfo.RequestPld) ([]*models.NotificationPld, error) {
-	return businfo.GetBusInfoV2(data)
+func fetchBusInfo(data avbusinfo.RequestPld, structureType string) ([]*models.NotificationPld, error) {
+	switch structureType {
+	case StructureTypeBus:
+		return routeInformation.GetBusInfo(data)
+	default:
+		return nil, errors.New("enter valid travel medium")
+	}
+
 }
 
 // Function to compare if there are updates in data

@@ -1,4 +1,4 @@
-package availableBusInformation
+package busInformation
 
 import (
 	"bytes"

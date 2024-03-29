@@ -1,18 +1,18 @@
 package main
 
 import (
-	"github.com/fahimimam/busbdChckr/tickerv1"
-	"github.com/fahimimam/busbdChckr/tickerv2"
+	"github.com/fahimimam/busbdChckr/stations"
+	"github.com/fahimimam/busbdChckr/ticker"
 )
 
 const (
 	runner = "v2"
 )
 
+func init() {
+	stations.ProcessStationMap()
+}
+
 func main() {
-	if runner == "v2" {
-		tickerv2.RunTickerV2()
-	} else {
-		tickerv1.RunTickerV1()
-	}
+	ticker.RetrieveInformation("dhaka", "coxs-bazar", "2024-04-04")
 }
