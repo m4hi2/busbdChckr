@@ -2,6 +2,7 @@ package notifier
 
 import (
 	"fmt"
+	"github.com/JahidNishat/BusTicketChecker/busbdChckr/routeInformation"
 	"strings"
 	"time"
 )
@@ -29,7 +30,7 @@ func (bot *TelegramBot) CheckCMD(messageText string, chatID int64) {
 
 	// TODO Have to call Bus Ticket Api
 	// Call for Bus Ticket Api
-	//data, err := Processor(source, destination, dateStr)
+	_, err = routeInformation.GetBusInfo(source, destination, dateStr)
 	if err != nil {
 		bot.SendMessage(chatID, "Cannot Fetch Data")
 		return

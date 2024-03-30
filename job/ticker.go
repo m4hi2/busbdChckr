@@ -7,8 +7,11 @@ import (
 )
 
 func StartTicker() {
-	ticker := time.NewTicker(viper.GetDuration("ticker.duration"))
-
+	tickerDuration := viper.GetDuration("ticker.duration")
+	if tickerDuration <= 0 {
+		tickerDuration = 1 * time.Hour
+	}
+	ticker := time.NewTicker(tickerDuration)
 	defer ticker.Stop()
 
 	for {
@@ -16,7 +19,7 @@ func StartTicker() {
 		case <-ticker.C:
 			log.Println("######################### Started Fetching #########################")
 
-			log.Println("######################### Finished Fetching #########################\n\n")
+			log.Printf("######################### Finished Fetching #########################\n\n\n")
 		}
 	}
 }
