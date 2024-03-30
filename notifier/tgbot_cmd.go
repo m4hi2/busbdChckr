@@ -28,16 +28,20 @@ func (bot *TelegramBot) CheckCMD(messageText string, chatID int64) {
 		return
 	}
 
-	// TODO Have to call Bus Ticket Api
-	// Call for Bus Ticket Api
-	_, err = routeInformation.GetBusInfo(source, destination, dateStr)
+	resPld, err := routeInformation.GetBusInfo(source, destination, dateStr)
 	if err != nil {
 		bot.SendMessage(chatID, "Cannot Fetch Data")
 		return
 	}
-
-	message := fmt.Sprintf("Tickets from %s to %s on %s are available: %t", source, destination, dateStr)
+	message := fmt.Sprintf("Total Available Bus: %v", len(resPld))
 	bot.SendMessage(chatID, message)
+
+	for _, data := range resPld {
+		message := StringifyStruct(*data)
+		//fmt.Println(data)
+		bot.SendMessage(chatID, message)
+	}
+
 	return
 }
 

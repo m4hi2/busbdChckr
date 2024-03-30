@@ -60,7 +60,7 @@ func ServeTgBot() {
 
 	for update := range updates {
 		if update.Message != nil {
-			telegramBot.HandleIncomingMessage(&update)
+			go telegramBot.HandleIncomingMessage(&update)
 		}
 	}
 }

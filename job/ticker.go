@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+// TODO: Ticker will be added  later
+
 func StartTicker() {
 	tickerDuration := viper.GetDuration("ticker.duration")
 	if tickerDuration <= 0 {

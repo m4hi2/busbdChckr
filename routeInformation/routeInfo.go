@@ -1,6 +1,7 @@
 package routeInformation
 
 import (
+	"errors"
 	availableBus "github.com/JahidNishat/BusTicketChecker/busbdChckr/busInformation"
 	"github.com/JahidNishat/BusTicketChecker/busbdChckr/routeInformation/models"
 	"github.com/JahidNishat/BusTicketChecker/busbdChckr/stations"
@@ -9,7 +10,13 @@ import (
 
 func GetBusInfo(source, destination, date string) ([]*models.ResponsePld, error) {
 	sourceID := stations.StationCodeToStationID[strings.ToLower(source)]
+	if sourceID == "" {
+		return nil, errors.New("invalid source")
+	}
 	destID := stations.StationCodeToStationID[strings.ToLower(destination)]
+	if destID == "" {
+		return nil, errors.New("invalid destination")
+	}
 	data := availableBus.RequestPld{
 		FromStationId: sourceID,
 		ToStationId:   destID,
@@ -27,7 +34,6 @@ func GetBusInfo(source, destination, date string) ([]*models.ResponsePld, error)
 			RouteName:      coach.RouteName,
 			AvailableSeats: coach.AvailableSeats,
 			StartCounter:   coach.StartCounter,
-			ArrivaleTime:   coach.ArrivaleTime,
 			DepartureTime:  coach.DepartureTime,
 			CompanyName:    coach.CompanyName,
 			Fare:           coach.Fare,

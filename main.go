@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
-	"github.com/JahidNishat/BusTicketChecker/busbdChckr/job"
 	"github.com/JahidNishat/BusTicketChecker/busbdChckr/notifier"
 	"github.com/JahidNishat/BusTicketChecker/busbdChckr/stations"
+	"github.com/spf13/viper"
+	"log"
 )
 
 func init() {
@@ -12,8 +12,12 @@ func init() {
 }
 
 func main() {
-	go job.StartTicker()
-	fmt.Println("Server running...")
-	notifier.ServeTgBot()
+	viper.SetConfigFile("./config.yaml")
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatalf("Error reading config file: %s", err)
+	}
 
+	//go job.StartTicker()
+	log.Println("Server running...")
+	notifier.ServeTgBot()
 }
