@@ -3,6 +3,8 @@ package notifier
 import (
 	"fmt"
 	"github.com/JahidNishat/BusTicketChecker/busbdChckr/routeInformation"
+	"github.com/JahidNishat/BusTicketChecker/busbdChckr/stations"
+	"github.com/JahidNishat/BusTicketChecker/busbdChckr/utils"
 	"strings"
 	"time"
 )
@@ -28,13 +30,14 @@ func (bot *TelegramBot) CheckCMD(messageText string, chatID int64) {
 		return
 	}
 
-	resPld, err := routeInformation.GetBusInfo(source, destination, dateStr)
+	source = utils.GetClosestStation(source, &stations.StationNames)
+	destination = utils.GetClosestStation(destination, &stations.StationNames)
+
+	resPld, availableCount, err := routeInformation.GetBusInfo(source, destination, dateStr)
 	if err != nil {
 		bot.SendMessage(chatID, "Cannot Fetch Data")
 		return
 	}
-	message := fmt.Sprintf("Total Available Bus: %v", len(resPld))
-	bot.SendMessage(chatID, message)
 
 	for _, data := range resPld {
 		message := StringifyStruct(*data)
@@ -42,6 +45,8 @@ func (bot *TelegramBot) CheckCMD(messageText string, chatID int64) {
 		bot.SendMessage(chatID, message)
 	}
 
+	message := fmt.Sprintf("Total Available Coach: %v\n Total Available Seats: %v\n", len(resPld), availableCount)
+	bot.SendMessage(chatID, message)
 	return
 }
 

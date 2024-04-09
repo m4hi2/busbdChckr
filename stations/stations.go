@@ -15,6 +15,7 @@ type Station struct {
 type CodeToID map[string]string
 
 var StationCodeToStationID CodeToID
+var StationNames []string
 
 func ProcessStationMap() {
 	file, err := os.Open("stations/locations.json")
@@ -36,5 +37,6 @@ func ProcessStationMap() {
 	// Create a hashmap to store the mapping from code to ID
 	for _, station := range stations {
 		StationCodeToStationID[station.Code] = station.ID
+		StationNames = append(StationNames, station.Code)
 	}
 }
