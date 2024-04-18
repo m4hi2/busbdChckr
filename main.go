@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/JahidNishat/BusTicketChecker/busbdChckr/notifier"
-	"github.com/JahidNishat/BusTicketChecker/busbdChckr/stations"
+	"github.com/m4hi2/busbdChckr/notifier"
+	"github.com/m4hi2/busbdChckr/stations"
 	"github.com/spf13/viper"
 	"log"
 )

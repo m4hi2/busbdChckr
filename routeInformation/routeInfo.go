@@ -2,20 +2,20 @@ package routeInformation
 
 import (
 	"errors"
-	availableBus "github.com/JahidNishat/BusTicketChecker/busbdChckr/busInformation"
-	"github.com/JahidNishat/BusTicketChecker/busbdChckr/routeInformation/models"
-	"github.com/JahidNishat/BusTicketChecker/busbdChckr/stations"
+	availableBus "github.com/m4hi2/busbdChckr/busInformation"
+	"github.com/m4hi2/busbdChckr/routeInformation/models"
+	"github.com/m4hi2/busbdChckr/stations"
 	"strings"
 )
 
-func GetBusInfo(source, destination, date string) ([]*models.ResponsePld, error) {
+func GetBusInfo(source, destination, date string) ([]*models.ResponsePld, int, error) {
 	sourceID := stations.StationCodeToStationID[strings.ToLower(source)]
 	if sourceID == "" {
-		return nil, errors.New("invalid source")
+		return nil, 0, errors.New("invalid source")
 	}
 	destID := stations.StationCodeToStationID[strings.ToLower(destination)]
 	if destID == "" {
-		return nil, errors.New("invalid destination")
+		return nil, 0, errors.New("invalid destination")
 	}
 	data := availableBus.RequestPld{
 		FromStationId: sourceID,
@@ -24,20 +24,24 @@ func GetBusInfo(source, destination, date string) ([]*models.ResponsePld, error)
 	}
 	bInfo, err := availableBus.GetAvailableBusInformation(data)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	var notificationForUser []*models.ResponsePld
+	var availableSeats int
 	for _, coach := range bInfo.Data {
-		notificationForUser = append(notificationForUser, &models.ResponsePld{
-			RouteId:        coach.RouteId,
-			CoachNo:        coach.CoachNo,
-			RouteName:      coach.RouteName,
-			AvailableSeats: coach.AvailableSeats,
-			StartCounter:   coach.StartCounter,
-			DepartureTime:  coach.DepartureTime,
-			CompanyName:    coach.CompanyName,
-			Fare:           coach.Fare,
-		})
+		if coach.AvailableSeats > 0 {
+			notificationForUser = append(notificationForUser, &models.ResponsePld{
+				RouteId:        coach.RouteId,
+				CoachNo:        coach.CoachNo,
+				RouteName:      coach.RouteName,
+				AvailableSeats: coach.AvailableSeats,
+				StartCounter:   coach.StartCounter,
+				DepartureTime:  coach.DepartureTime,
+				CompanyName:    coach.CompanyName,
+				Fare:           coach.Fare,
+			})
+			availableSeats += coach.AvailableSeats
+		}
 	}
-	return notificationForUser, nil
+	return notificationForUser, availableSeats, nil
 }
