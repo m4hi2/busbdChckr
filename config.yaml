@@ -1,5 +1,5 @@
 telegram:
-  token: 7037492858:AAFh1yKSaifXowyULssSn2kbQPHJL-VbhoE
+  token: 7037492858:AAFh1yKSaifXowyULssSn2kbQPHJL-VbhoE  # test_bot
 
 ticker:
   duration: 1h

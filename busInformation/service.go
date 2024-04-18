@@ -2,7 +2,7 @@ package busInformation
 
 import (
 	"encoding/json"
-	"github.com/JahidNishat/BusTicketChecker/busbdChckr/routeInformation/client"
+	"github.com/m4hi2/busbdChckr/routeInformation/client"
 	"net/http"
 )
 

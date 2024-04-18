@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"github.com/JahidNishat/BusTicketChecker/busbdChckr/stations"
+	"github.com/m4hi2/busbdChckr/stations"
 	"testing"
 )
 

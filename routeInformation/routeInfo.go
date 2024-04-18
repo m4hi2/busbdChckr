@@ -2,9 +2,9 @@ package routeInformation
 
 import (
 	"errors"
-	availableBus "github.com/JahidNishat/BusTicketChecker/busbdChckr/busInformation"
-	"github.com/JahidNishat/BusTicketChecker/busbdChckr/routeInformation/models"
-	"github.com/JahidNishat/BusTicketChecker/busbdChckr/stations"
+	availableBus "github.com/m4hi2/busbdChckr/busInformation"
+	"github.com/m4hi2/busbdChckr/routeInformation/models"
+	"github.com/m4hi2/busbdChckr/stations"
 	"strings"
 )
 

@@ -1,6 +1,6 @@
 package job
 
-import "github.com/JahidNishat/BusTicketChecker/busbdChckr/routeInformation/models"
+import "github.com/m4hi2/busbdChckr/routeInformation/models"
 
 const StructureTypeBus = "BUS"
 

@@ -2,9 +2,9 @@ package notifier
 
 import (
 	"fmt"
-	"github.com/JahidNishat/BusTicketChecker/busbdChckr/routeInformation"
-	"github.com/JahidNishat/BusTicketChecker/busbdChckr/stations"
-	"github.com/JahidNishat/BusTicketChecker/busbdChckr/utils"
+	"github.com/m4hi2/busbdChckr/routeInformation"
+	"github.com/m4hi2/busbdChckr/stations"
+	"github.com/m4hi2/busbdChckr/utils"
 	"strings"
 	"time"
 )
