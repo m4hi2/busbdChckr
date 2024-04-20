@@ -8,7 +8,6 @@ import (
 	"github.com/m4hi2/busbdChckr/stations"
 	"github.com/m4hi2/busbdChckr/utils"
 	"strings"
-	"time"
 )
 
 func (bot *TelegramBot) StartCMD(chatID int64) {
@@ -26,9 +25,9 @@ func (bot *TelegramBot) CheckCMD(messageText string, chatID int64) {
 	source := parts[1]
 	destination := parts[2]
 	dateStr := parts[3]
-	_, err := time.Parse("2006-01-02", dateStr)
-	if err != nil {
-		bot.SendMessage(chatID, "Invalid date format. Please use YYYY-MM-DD")
+
+	if utils.IsDateExpired(dateStr) {
+		bot.SendMessage(chatID, "Invalid date or date format. Please use YYYY-MM-DD or ensure it's not a past date.")
 		return
 	}
 
@@ -46,15 +45,6 @@ func (bot *TelegramBot) CheckCMD(messageText string, chatID int64) {
 		bot.SendMessage(chatID, "Cannot Fetch Data")
 		return
 	}
-
-	//for _, data := range resPld {
-	//	message := StringifyStruct(*data)
-	//	//fmt.Println(data)
-	//	bot.SendMessage(chatID, message)
-	//}
-
-	//message := fmt.Sprintf("Total Available Coach: %v\n Total Available Seats: %v\n", len(resPld), availableCount)
-	//bot.SendMessage(chatID, message)
 
 	u := repos.UserStore{DB: db.ConnectDB()}
 	_ = u.CreateUser(&models.User{

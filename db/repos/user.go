@@ -10,8 +10,8 @@ type UserStore struct {
 	DB *gorm.DB
 }
 
-func (d *UserStore) GetAll() ([]models.User, error) {
-	var users []models.User
+func (d *UserStore) GetAll() ([]*models.User, error) {
+	var users []*models.User
 
 	err := d.DB.Find(&users).Error
 	if err != nil {
@@ -45,5 +45,16 @@ func (d *UserStore) CreateUser(user *models.User) error {
 		log.Println("Error while creating entry in db", res.Error)
 		return res.Error
 	}
+	return nil
+}
+
+func (d *UserStore) DeleteUser(user *models.User) error {
+	res := d.DB.Delete(user)
+
+	if res.Error != nil {
+		log.Println("Error while deleting entry in db", res.Error)
+		return res.Error
+	}
+
 	return nil
 }

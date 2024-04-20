@@ -5,6 +5,7 @@ import (
 	"github.com/m4hi2/busbdChckr/db/repos"
 	"github.com/m4hi2/busbdChckr/notifier"
 	"github.com/m4hi2/busbdChckr/routeInformation"
+	"github.com/m4hi2/busbdChckr/utils"
 	"log"
 )
 
@@ -22,6 +23,17 @@ func GetUserData() error {
 	}
 
 	for _, user := range users {
+		if utils.IsDateExpired(user.Date) {
+			log.Println("Date expired")
+
+			err := u.DeleteUser(user)
+			if err != nil {
+				log.Println("Error deleting user", err)
+			}
+
+			continue
+		}
+
 		busInfos, seat, err := routeInformation.GetBusInfo(user.Source, user.Destination, user.Date)
 		if err != nil {
 			log.Println("Fetching Bus Info Error: ", err)
