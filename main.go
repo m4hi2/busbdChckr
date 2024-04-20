@@ -2,12 +2,14 @@ package main
 
 import (
 	"github.com/m4hi2/busbdChckr/db"
+	"github.com/m4hi2/busbdChckr/job"
+	"github.com/m4hi2/busbdChckr/notifier"
 	"github.com/m4hi2/busbdChckr/stations"
 	"github.com/spf13/viper"
 	"log"
 )
 
-func init() {
+func InitAll() {
 	stations.ProcessStationMap()
 
 	viper.SetConfigFile("./config.yaml")
@@ -15,14 +17,13 @@ func init() {
 		log.Fatalf("Error reading config file: %s", err)
 	}
 
-	err := db.DoPersistConnect()
-	if err != nil {
-		log.Fatalf("Error connecting to database: %v", err)
-	}
+	db.ConnectDB()
 }
 
 func main() {
-	//go job.StartTicker()
+	InitAll()
+
+	go job.StartTicker()
 	log.Println("Server running...")
 	notifier.ServeTgBot()
 }

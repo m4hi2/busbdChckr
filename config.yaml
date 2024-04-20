@@ -1,8 +1,8 @@
 telegram:
-  token: 7037492858:AAFh1yKSaifXowyULssSn2kbQPHJL-VbhoE  # test_bot
+  token: 6570837276:AAENP4XX-GB3EkDLiu51WRZQVObkrALkpcQ  # test_bot
 
 ticker:
-  duration: 1h
+  duration: 10s
 
 database:
   host: localhost

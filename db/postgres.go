@@ -2,38 +2,22 @@ package db
 
 import (
 	"fmt"
+	"github.com/m4hi2/busbdChckr/db/models"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"log"
 )
 
-var defaultDB *gorm.DB
+var (
+	Db  *gorm.DB
+	err error
+)
 
-func PersistDB() *gorm.DB {
-	return defaultDB
-}
-
-func PersistConnect() error {
-	if defaultDB != nil {
-		return nil
+func ConnectDB() *gorm.DB {
+	if Db != nil {
+		return Db
 	}
-
-	con, err := NewConnection()
-
-	if err != nil {
-		return err
-	}
-
-	defaultDB = con
-
-	return nil
-}
-
-func DoPersistConnect() error {
-	return PersistConnect()
-}
-
-func NewConnection() (*gorm.DB, error) {
 	host := viper.GetString("database.host")
 	port := viper.GetString("database.port")
 	password := viper.GetString("database.password")
@@ -43,14 +27,16 @@ func NewConnection() (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s port=%s password=%s user=%s dbname=%s sslmode=disable",
 		host, port, password, user, dbname)
 
-	con, err := gorm.Open(
-		postgres.Open(dsn),
-		&gorm.Config{},
-	)
-
+	Db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return nil, err
+		log.Fatal("DB connection error", err)
+		return nil
 	}
-
-	return con, nil
+	err = Db.AutoMigrate(&models.User{}, &models.Log{})
+	if err != nil {
+		log.Fatal("DB migration error: ", err)
+		return nil
+	}
+	fmt.Println("Successfully Connected Database")
+	return Db
 }

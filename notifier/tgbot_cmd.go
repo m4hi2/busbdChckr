@@ -1,7 +1,9 @@
 package notifier
 
 import (
-	"fmt"
+	"github.com/m4hi2/busbdChckr/db"
+	"github.com/m4hi2/busbdChckr/db/models"
+	"github.com/m4hi2/busbdChckr/db/repos"
 	"github.com/m4hi2/busbdChckr/routeInformation"
 	"github.com/m4hi2/busbdChckr/stations"
 	"github.com/m4hi2/busbdChckr/utils"
@@ -39,14 +41,29 @@ func (bot *TelegramBot) CheckCMD(messageText string, chatID int64) {
 		return
 	}
 
-	for _, data := range resPld {
-		message := StringifyStruct(*data)
-		//fmt.Println(data)
-		bot.SendMessage(chatID, message)
+	err = ProcessData(resPld, availableCount, chatID)
+	if err != nil {
+		bot.SendMessage(chatID, "Cannot Fetch Data")
+		return
 	}
 
-	message := fmt.Sprintf("Total Available Coach: %v\n Total Available Seats: %v\n", len(resPld), availableCount)
-	bot.SendMessage(chatID, message)
+	//for _, data := range resPld {
+	//	message := StringifyStruct(*data)
+	//	//fmt.Println(data)
+	//	bot.SendMessage(chatID, message)
+	//}
+
+	//message := fmt.Sprintf("Total Available Coach: %v\n Total Available Seats: %v\n", len(resPld), availableCount)
+	//bot.SendMessage(chatID, message)
+
+	u := repos.UserStore{DB: db.ConnectDB()}
+	_ = u.CreateUser(&models.User{
+		ChatID:      chatID,
+		Source:      source,
+		Destination: destination,
+		Date:        dateStr,
+	})
+
 	return
 }
 
