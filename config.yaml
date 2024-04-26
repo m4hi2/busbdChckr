@@ -1,0 +1,12 @@
+telegram:
+  token: xx  # test_bot
+
+ticker:
+  duration: 30s
+
+database:
+  host: localhost
+  port: 5432
+  password: 12345
+  user: postgres
+  dbname: busbd
