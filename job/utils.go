@@ -21,7 +21,7 @@ func isEqual(a, b []*models.ResponsePld) bool {
 			a[i].RouteName != b[i].RouteName ||
 			a[i].AvailableSeats != b[i].AvailableSeats ||
 			a[i].StartCounter != b[i].StartCounter ||
-			!equalStringPointer(a[i].ArrivaleTime, b[i].ArrivaleTime) ||
+			//!equalStringPointer(a[i].ArrivaleTime, b[i].ArrivaleTime) ||
 			a[i].DepartureTime != b[i].DepartureTime ||
 			a[i].CompanyName != b[i].CompanyName ||
 			a[i].Fare != b[i].Fare {

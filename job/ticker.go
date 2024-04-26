@@ -1,6 +1,7 @@
 package job
 
 import (
+	"github.com/m4hi2/busbdChckr/proccessor"
 	"github.com/spf13/viper"
 	"log"
 	"time"
@@ -20,6 +21,8 @@ func StartTicker() {
 		select {
 		case <-ticker.C:
 			log.Println("######################### Started Fetching #########################")
+
+			proccessor.GetUserData()
 
 			log.Printf("######################### Finished Fetching #########################\n\n\n")
 		}

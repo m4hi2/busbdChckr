@@ -11,15 +11,27 @@ type TelegramBot struct {
 	botAPI *tgbotapi.BotAPI
 }
 
+var tgBot *TelegramBot
+
 func NewTelegramBot() (*TelegramBot, error) {
 	token := viper.GetString("telegram.token")
 	botAPI, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		return nil, err
 	}
+
 	return &TelegramBot{
 		botAPI: botAPI,
 	}, nil
+}
+
+func GetTelegramBot() (*TelegramBot, error) {
+	var err error
+	if tgBot == nil {
+		tgBot, err = NewTelegramBot()
+	}
+
+	return tgBot, err
 }
 
 func (bot *TelegramBot) HandleIncomingMessage(update *tgbotapi.Update) {
@@ -42,6 +54,7 @@ func (bot *TelegramBot) HandleIncomingMessage(update *tgbotapi.Update) {
 
 func (bot *TelegramBot) SendMessage(chatID int64, message string) {
 	msg := tgbotapi.NewMessage(chatID, message)
+	msg.ParseMode = tgbotapi.ModeMarkdown
 	_, err := bot.botAPI.Send(msg)
 	if err != nil {
 		log.Println("Error sending message:", err)
@@ -49,7 +62,7 @@ func (bot *TelegramBot) SendMessage(chatID int64, message string) {
 }
 
 func ServeTgBot() {
-	telegramBot, err := NewTelegramBot()
+	telegramBot, err := GetTelegramBot()
 	if err != nil {
 		log.Println("Error initializing Telegram bot:", err)
 		return
