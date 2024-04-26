@@ -1,8 +1,8 @@
 telegram:
-  token: xx  # test_bot
+  token: 6570837276:AAENP4XX-GB3EkDLiu51WRZQVObkrALkpcQ  # test_bot
 
 ticker:
-  duration: 10s
+  duration: 30s
 
 database:
   host: localhost

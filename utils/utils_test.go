@@ -17,7 +17,7 @@ func TestIsDateExpired(t *testing.T) {
 		// Date in the past (expired)
 		{
 			name: "Date in the past",
-			args: args{dateString: "2022-01-01"},
+			args: args{dateString: "2022-04-31"},
 			want: true,
 		},
 		// Date in the future (not expired)

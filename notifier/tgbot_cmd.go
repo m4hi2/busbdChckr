@@ -12,19 +12,21 @@ import (
 
 func (bot *TelegramBot) StartCMD(chatID int64) {
 	bot.SendMessage(chatID, "Welcome to Bus Ticket Availability Checker! Please use "+
-		"/check <source> <destination> <date> command to check ticket availability.")
+		"/check <source> <destination> <date>[YYYY-MM-DD] command to check ticket availability.")
 }
 
 func (bot *TelegramBot) CheckCMD(messageText string, chatID int64) {
 	// Parse user input to get source, destination, and date
 	parts := strings.Split(messageText, " ")
 	if len(parts) != 4 {
-		bot.SendMessage(chatID, "Invalid command usage. Please use /check <source> <destination> <date>")
+		bot.SendMessage(chatID, "Invalid command usage. Please use /check <source> <destination> <date>[YYYY-MM-DD] command to check ticket availability.")
 		return
 	}
 	source := parts[1]
 	destination := parts[2]
 	dateStr := parts[3]
+
+	//expired := utils.IsDateExpired(dateStr)
 
 	if utils.IsDateExpired(dateStr) {
 		bot.SendMessage(chatID, "Invalid date or date format. Please use YYYY-MM-DD or ensure it's not a past date.")
@@ -34,13 +36,13 @@ func (bot *TelegramBot) CheckCMD(messageText string, chatID int64) {
 	source = utils.GetClosestStation(source, &stations.StationNames)
 	destination = utils.GetClosestStation(destination, &stations.StationNames)
 
-	resPld, availableCount, err := routeInformation.GetBusInfo(source, destination, dateStr)
-	if err != nil {
-		bot.SendMessage(chatID, "Cannot Fetch Data")
+	resPld, _, err := routeInformation.GetBusInfo(source, destination, dateStr)
+	if err != nil || resPld == nil {
+		bot.SendMessage(chatID, "Invalid Source or Destination. Please use valid Source or Destination.")
 		return
 	}
 
-	err = ProcessData(resPld, availableCount, chatID)
+	err = ProcessData(resPld, chatID)
 	if err != nil {
 		bot.SendMessage(chatID, "Cannot Fetch Data")
 		return

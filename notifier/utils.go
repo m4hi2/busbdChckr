@@ -3,6 +3,7 @@ package notifier
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/m4hi2/busbdChckr/db"
@@ -13,6 +14,30 @@ import (
 	"log"
 	"reflect"
 )
+
+type ResponseData struct {
+	CoachNo        string `json:"coachNo"`
+	RouteName      string `json:"routeName"`
+	AvailableSeats int    `json:"availableSeats"`
+	StartCounter   string `json:"startCounter"`
+	DepartureTime  string `json:"departureTime"`
+	CompanyName    string `json:"companyName"`
+	Fare           string `json:"fare"`
+}
+
+func ResponseStruct(busInfo *rm.ResponsePld) string {
+	responseData := &ResponseData{
+		CoachNo:        busInfo.CoachNo,
+		RouteName:      busInfo.RouteName,
+		AvailableSeats: busInfo.AvailableSeats,
+		StartCounter:   busInfo.StartCounter,
+		DepartureTime:  busInfo.DepartureTime,
+		CompanyName:    busInfo.CompanyName,
+		Fare:           busInfo.Fare,
+	}
+
+	return StringifyStruct(*responseData)
+}
 
 func StringifyStruct(data interface{}) string {
 	val := reflect.ValueOf(data)
@@ -33,11 +58,28 @@ func StringifyStruct(data interface{}) string {
 	return str
 }
 
-func HashData(str string) string {
+type HashedDataPld struct {
+	RouteId     string `json:"routeId"`
+	CoachNo     string `json:"coachNo"`
+	RouteName   string `json:"routeName"`
+	CompanyName string `json:"companyName"`
+}
+
+func HashData(busInfo *rm.ResponsePld) string {
+	hashedDataPld := &HashedDataPld{
+		RouteId:     busInfo.RouteId,
+		CoachNo:     busInfo.CoachNo,
+		RouteName:   busInfo.RouteName,
+		CompanyName: busInfo.CompanyName,
+	}
+
+	jsonData, _ := json.Marshal(hashedDataPld)
+
 	sha1Hash := sha1.New()
-	sha1Hash.Write([]byte(str))
+	sha1Hash.Write(jsonData)
 	hashBytes := sha1Hash.Sum(nil)
 	sha1String := hex.EncodeToString(hashBytes)
+
 	return sha1String
 }
 
@@ -53,28 +95,29 @@ func PublishToUsers(chatID int64, stringifyData string) error {
 	return nil
 }
 
-func ProcessData(busInfos []*rm.ResponsePld, seat int, chatID int64) error {
+type HashedData struct {
+	RouteId       string `json:"routeId"`
+	CoachNo       string `json:"coachNo"`
+	RouteName     string `json:"routeName"`
+	StartCounter  string `json:"startCounter"`
+	DepartureTime string `json:"departureTime"`
+	CompanyName   string `json:"companyName"`
+	Fare          string `json:"fare"`
+}
+
+func ProcessData(busInfos []*rm.ResponsePld, chatID int64) error {
 	u := repos.UserStore{db.ConnectDB()}
-
-	message := fmt.Sprintf("Total Available Coach: %v\n Total Available Seats: %v\n", len(busInfos), seat)
-	bot, err := GetTelegramBot()
-	if err != nil {
-		log.Println("Fetching Telegram Bot Error: ", err)
-		return err
-	}
-
-	bot.SendMessage(chatID, message)
+	var availableCoach, availableSeat int
 
 	for _, busInfo := range busInfos {
-		stringifyData := StringifyStruct(*busInfo)
-		log.Println(stringifyData)
-
-		hashData := HashData(stringifyData)
-		log.Println(hashData)
+		hashData := HashData(busInfo)
+		log.Println("Hashed Data: ", hashData)
 
 		logData, err := u.FindHash(hashData)
 		if errors.Is(err, gorm.ErrRecordNotFound) && logData == nil {
-			err = PublishToUsers(chatID, stringifyData)
+			responseData := ResponseStruct(busInfo)
+
+			err = PublishToUsers(chatID, responseData)
 			if err != nil {
 				log.Println("Failed while sending the update")
 				continue
@@ -84,13 +127,30 @@ func ProcessData(busInfos []*rm.ResponsePld, seat int, chatID int64) error {
 			err = u.InsertData(&models.Log{
 				ChatID: chatID,
 				Hash:   hashData,
-				Data:   stringifyData,
+				Data:   responseData,
 			})
 			if err != nil {
 				log.Println("Failed while inserting data into database: ", err)
 				return err
 			}
+
+			if busInfo.AvailableSeats > 0 {
+				availableSeat += busInfo.AvailableSeats
+				availableCoach++
+			}
 		}
 	}
+
+	message := fmt.Sprintf("Total New Available Coach: %v\n Total New Available Seats: %v\n", availableCoach, availableSeat)
+	bot, err := GetTelegramBot()
+	if err != nil {
+		log.Println("Fetching Telegram Bot Error: ", err)
+		return err
+	}
+
+	if availableSeat > 0 && availableCoach > 0 {
+		bot.SendMessage(chatID, message)
+	}
+
 	return nil
 }

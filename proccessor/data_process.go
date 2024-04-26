@@ -34,13 +34,13 @@ func GetUserData() error {
 			continue
 		}
 
-		busInfos, seat, err := routeInformation.GetBusInfo(user.Source, user.Destination, user.Date)
+		busInfos, _, err := routeInformation.GetBusInfo(user.Source, user.Destination, user.Date)
 		if err != nil {
 			log.Println("Fetching Bus Info Error: ", err)
 			return err
 		}
 
-		err2 := notifier.ProcessData(busInfos, seat, user.ChatID)
+		err2 := notifier.ProcessData(busInfos, user.ChatID)
 		if err2 != nil {
 			return err2
 		}
