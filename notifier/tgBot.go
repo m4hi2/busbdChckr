@@ -54,6 +54,7 @@ func (bot *TelegramBot) HandleIncomingMessage(update *tgbotapi.Update) {
 
 func (bot *TelegramBot) SendMessage(chatID int64, message string) {
 	msg := tgbotapi.NewMessage(chatID, message)
+	msg.ParseMode = tgbotapi.ModeMarkdown
 	_, err := bot.botAPI.Send(msg)
 	if err != nil {
 		log.Println("Error sending message:", err)

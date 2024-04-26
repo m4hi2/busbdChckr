@@ -1,19 +1,33 @@
 package notifier
 
 import (
+	"bytes"
 	"crypto/sha1"
+	_ "embed"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/m4hi2/busbdChckr/db"
-	"github.com/m4hi2/busbdChckr/db/models"
-	"github.com/m4hi2/busbdChckr/db/repos"
 	rm "github.com/m4hi2/busbdChckr/routeInformation/models"
-	"gorm.io/gorm"
 	"log"
 	"reflect"
+	"text/template"
 )
+
+//go:embed "response.tmpl"
+var responseTmpl string
+
+var result *template.Template
+
+func init() {
+	var err error
+	if result == nil {
+		result, err = template.New("responseTmpl").Parse(responseTmpl)
+		if err != nil {
+			log.Printf("Error parsing template: %v", err)
+			return
+		}
+	}
+}
 
 type ResponseData struct {
 	CoachNo        string `json:"coachNo"`
@@ -36,7 +50,13 @@ func ResponseStruct(busInfo *rm.ResponsePld) string {
 		Fare:           busInfo.Fare,
 	}
 
-	return StringifyStruct(*responseData)
+	var b bytes.Buffer
+	err := result.Execute(&b, responseData)
+	if err != nil {
+		log.Printf("Error executing template: %v", err)
+	}
+
+	return b.String()
 }
 
 func StringifyStruct(data interface{}) string {
@@ -81,76 +101,4 @@ func HashData(busInfo *rm.ResponsePld) string {
 	sha1String := hex.EncodeToString(hashBytes)
 
 	return sha1String
-}
-
-func PublishToUsers(chatID int64, stringifyData string) error {
-	bot, err := GetTelegramBot()
-	if err != nil {
-		log.Println("Error getting Telegram bot:", err)
-		return err
-	}
-
-	bot.SendMessage(chatID, stringifyData)
-
-	return nil
-}
-
-type HashedData struct {
-	RouteId       string `json:"routeId"`
-	CoachNo       string `json:"coachNo"`
-	RouteName     string `json:"routeName"`
-	StartCounter  string `json:"startCounter"`
-	DepartureTime string `json:"departureTime"`
-	CompanyName   string `json:"companyName"`
-	Fare          string `json:"fare"`
-}
-
-func ProcessData(busInfos []*rm.ResponsePld, chatID int64) error {
-	u := repos.UserStore{db.ConnectDB()}
-	var availableCoach, availableSeat int
-
-	for _, busInfo := range busInfos {
-		hashData := HashData(busInfo)
-		log.Println("Hashed Data: ", hashData)
-
-		logData, err := u.FindHash(hashData)
-		if errors.Is(err, gorm.ErrRecordNotFound) && logData == nil {
-			responseData := ResponseStruct(busInfo)
-
-			err = PublishToUsers(chatID, responseData)
-			if err != nil {
-				log.Println("Failed while sending the update")
-				continue
-			}
-
-			// Insert new hash data
-			err = u.InsertData(&models.Log{
-				ChatID: chatID,
-				Hash:   hashData,
-				Data:   responseData,
-			})
-			if err != nil {
-				log.Println("Failed while inserting data into database: ", err)
-				return err
-			}
-
-			if busInfo.AvailableSeats > 0 {
-				availableSeat += busInfo.AvailableSeats
-				availableCoach++
-			}
-		}
-	}
-
-	message := fmt.Sprintf("Total New Available Coach: %v\n Total New Available Seats: %v\n", availableCoach, availableSeat)
-	bot, err := GetTelegramBot()
-	if err != nil {
-		log.Println("Fetching Telegram Bot Error: ", err)
-		return err
-	}
-
-	if availableSeat > 0 && availableCoach > 0 {
-		bot.SendMessage(chatID, message)
-	}
-
-	return nil
 }

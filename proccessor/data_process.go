@@ -40,7 +40,7 @@ func GetUserData() error {
 			return err
 		}
 
-		err2 := notifier.ProcessData(busInfos, user.ChatID)
+		err2 := notifier.ProcessData(busInfos, user.ChatID, user.Source, user.Destination, user.Date)
 		if err2 != nil {
 			return err2
 		}
